@@ -57,10 +57,24 @@ class Api {
   }
 
 
-  static mapPhotoToURL(photo, size_suffix = "o") {
+  static mapPhotoToURL(photo, size_suffix = "b") {  // 1024 on large side by default, for the original image use 'o'
     const { farm, server, id, secret, originalsecret, originalformat } = photo;
-    const photo_secret = size_suffix === "o" ? originalsecret : secret;
+    const photo_secret = size_suffix === "o"  ? originalsecret : secret;
     return `https://farm${farm}.staticflickr.com/${server}/${id}_${photo_secret}_${size_suffix}.${originalformat}`;
+  }
+  static async getAnalyzedPhotos(page = 1, per_page=5) {
+    let result = {
+      photos: null,
+      error: null
+    };
+    try {
+      result = await this.getPhotos(page, per_page);
+      await this.analyzePhotoSetAndModify(result.photos.photo);
+    } catch (error) {
+      console.error(error);
+      result.error = error;
+    }
+    return result;
   }
   static async getPhotos(page = 1, per_page=5) {
     let result = {
@@ -75,8 +89,6 @@ class Api {
         return photo;
       });
       result.photos = response;
-      await this.analyzePhotoSetAndModify(result.photos.photo);
-
     } catch (error) {
       console.error(error);
       result.error = error;
@@ -84,6 +96,7 @@ class Api {
     return result;
   }
 }
+
 
 
 
