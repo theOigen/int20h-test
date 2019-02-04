@@ -1,0 +1,22 @@
+{
+    "parserOptions": {
+        "ecmaVersion": 8,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true
+        },
+        "parser": "babel-eslint"
+    },
+    "rules": {
+        "semi": 2,
+        "no-undef": "error",
+        "eqeqeq": "error",
+        "no-var": "error"
+    },
+    "env": {
+        "es6": true,
+        "node": true,
+        "browser": true,
+        "jquery": true
+    }
+}
