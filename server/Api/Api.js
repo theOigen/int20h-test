@@ -1,18 +1,21 @@
 const Flickr = require("flickr-sdk");
 const axios = require("axios");
 const promisify = require('util').promisify;
-const options = {
-  flickr_api_key: "653588b4a53594b839e5af497dea2f3d",
-  flickr_secret: "cd3fc9a52873b6bd",
-  user_id: "144522605@N06",
-  album_id: "72157674388093532",
-  fpp_api_key: "6cbxOJD1SNpMurRFJ0W9IOBYJAd76THI",
-  fpp_secret: "Am99rkBpVebGCnYg33DDgTveyyRW0kec"
-};
-flickr = new Flickr(options.flickr_api_key);
+const config = require("../config");
+flickr = new Flickr(config.flickr_api_key);
 // const analyze = promisify(facepp.post);
 
 class Api {
+
+  static analyzeEmotion(emotion){
+    let max_emotion_id = "neutral";
+    for(const id in emotion){
+      if(emotion[id] > emotion[max_emotion_id])
+        max_emotion_id = id;
+    }
+    return max_emotion_id;
+
+  }
   static async analyzePhoto(photo_url) {
     let result = {
       info: {},
@@ -20,15 +23,22 @@ class Api {
     };
 
     try {
-      let response = await axios.post('https://api-us.faceplusplus.com/facepp/v3/detect', null, {
+      const response = await axios.post('https://api-us.faceplusplus.com/facepp/v3/detect', null, {
         params: {
-          api_key: options.fpp_api_key,
-          api_secret: options.fpp_secret,
+          api_key: config.fpp_api_key,
+          api_secret: config.fpp_secret,
           image_url: photo_url,
           return_attributes: "emotion"
         }
       });
       result.info = response.data;
+      for(let face of result.info.faces){
+        if(face.attributes){
+           const max_emotion = this.analyzeEmotion(face.attributes.emotion);
+          face.emotion = max_emotion;
+        }else face.emotion = "none";
+        face.attributes = face.face_token = undefined; // delete unused fields
+      }
      // console.log(response.data);
     } catch (error) {
       //console.error(error);
@@ -38,11 +48,11 @@ class Api {
   }
 
   static async analyzePhotoSetAndModify(photos){
-    for (let photo of photos) {
-      let analyzed_info = await this.analyzePhoto(this.mapPhotoToURL(photo, "c"));
+    for (const photo of photos) {
+      const analyzed_info = await this.analyzePhoto(this.mapPhotoToURL(photo, "c"));
       if(analyzed_info.error) 
         throw new Error(analyzed_info.error.message);
-      photo.faces_info = analyzed_info;
+      else photo.faces_info = analyzed_info.info.faces;
     }
   }
 
@@ -58,8 +68,7 @@ class Api {
       error: null
     }
     try {
-
-      let raw_response = await flickr.photos.search({ text: 'int20h', page, per_page, extras: "original_format" });
+      const raw_response = await flickr.photos.search({ text: 'int20h', page, per_page, extras: "original_format" });
       let response = raw_response.body.photos;
       response.photo = response.photo.map(photo => {
         photo.url = this.mapPhotoToURL(photo);
