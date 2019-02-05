@@ -3,6 +3,7 @@ const axios = require("axios");
 const config = require("../config");
 
 const flickr = new Flickr(config.flickr_api_key);
+const API_RATE_LIMIT = 3; // 3 async request is working fine
 
 class Api {
     static analyzeEmotion(emotion) {
@@ -35,25 +36,29 @@ class Api {
                 } else face.emotion = "none";
                 face.attributes = face.face_token = undefined; // delete unused fields
             }
-            // console.log(response.data);
+            //console.log(response.data);
         } catch (error) {
-            //console.error(error);
-            result.error = error;
+            console.error(error.response.data);
+            result.error = new Error(error.response.data.error_message);
         }
         return result;
     }
 
     static async analyzePhotoSetAndModify(photos) {
-        const analyzeProms = [];
-        for (const photo of photos) {
-            analyzeProms.push(this.analyzePhoto(this.mapPhotoToURL(photo, "c")));
+        let infoArr = [];
+        for (let i = 0; i < photos.length; i += API_RATE_LIMIT) {
+            const analyzeProms = [];
+            for (let rate_counter = 0; rate_counter < API_RATE_LIMIT && i+rate_counter< photos.length; rate_counter++)
+                analyzeProms.push(this.analyzePhoto(this.mapPhotoToURL(photos[i + rate_counter], "c")))
+            const partInfoArr = await Promise.all(analyzeProms);
+            infoArr = infoArr.concat(partInfoArr);
         }
-        const analyzedInfoArr = await Promise.all(analyzeProms);
-        for (const index in analyzedInfoArr) {
-            if (analyzedInfoArr[index].error) {
-                throw new Error(analyzedInfoArr[index].error.message);
+        
+        for (const index in infoArr) {
+            if (infoArr[index].error) {
+                throw new Error(infoArr[index].error.message);
             } else {
-                photos[index].faces_info = analyzedInfoArr[index].info.faces;
+                photos[index].faces_info = infoArr[index].info.faces;
             }
         }
     }
@@ -74,7 +79,7 @@ class Api {
             await this.analyzePhotoSetAndModify(result.photos.photo);
         } catch (error) {
             console.error(error);
-            result.error = error;
+            result.error = error.message;
         }
         return result;
     }
