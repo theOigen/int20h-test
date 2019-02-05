@@ -44,11 +44,17 @@ class Api {
     }
 
     static async analyzePhotoSetAndModify(photos) {
+        const analyzeProms = [];
         for (const photo of photos) {
-            const analyzed_info = await this.analyzePhoto(this.mapPhotoToURL(photo, "c"));
-            if (analyzed_info.error)
-                throw new Error(analyzed_info.error.message);
-            else photo.faces_info = analyzed_info.info.faces;
+            analyzeProms.push(this.analyzePhoto(this.mapPhotoToURL(photo, "c")));
+        }
+        const analyzedInfoArr = await Promise.all(analyzeProms);
+        for (const index in analyzedInfoArr) {
+            if (analyzedInfoArr[index].error) {
+                throw new Error(analyzedInfoArr[index].error.message);
+            } else {
+                photos[index].faces_info = analyzedInfoArr[index].info.faces;
+            }
         }
     }
 
