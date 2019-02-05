@@ -5,32 +5,30 @@ const router = express.Router();
 // middleware that is specific to this router
 // define the home page route
 router.get('/photos', async (req, res) => {
-    let page = req.query.page > 0 ? req.query.page : 1;
-    let per_page = req.query.per_page > 0 ? req.query.per_page : 5;
-    let is_raw = req.query.raw === "true";
+    const page = req.query.page > 0 ? req.query.page : 1;
+    const per_page = req.query.per_page > 0 ? req.query.per_page : 5;
+    const is_raw = req.query.raw === "true";
 
-
-    let response = !is_raw ?
+    const response = !is_raw ?
         await api.getAnalyzedPhotos(page, per_page) :
         await api.getPhotos(page, per_page);
     res.json(response);
 });
 
 router.post('/detect', async (req, res) => {
-    let url = req.body.photo_url;
+    const url = req.body.photo_url;
     console.log(req.body);
     let response = null;
     try {
-         response = await api.analyzePhoto(url);
-         if(response.error)
+        response = await api.analyzePhoto(url);
+        if (response.error)
             throw response.error;
     } catch (error) {
         console.log(error);
         response = {
-           error :  error.message
+            error: error.message
         };
     }
-    //console.log(response);
     res.json(response);
 });
 
