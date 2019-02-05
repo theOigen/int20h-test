@@ -89,7 +89,7 @@ class Api {
             error: null
         };
         try {
-            const raw_response = await flickr.photos.search({ text: 'int20h', page, per_page, extras: "original_format" });
+            const raw_response = await flickr.photos.search({ text: '#int20h', page, per_page, extras: "original_format" });
             const response = raw_response.body.photos;
             response.photo = response.photo.map(photo => {
                 photo.url = this.mapPhotoToURL(photo);
