@@ -32,6 +32,16 @@ router.post('/detect', async (req, res) => {
     res.json(response);
 });
 
+router.get('/filtre', async (req, res) => {
+    const filtres = req.query.filtres.split(" ");
+    const page = req.query.page > 0 ? req.query.page : 1;
+    const origin_page = req.query.origin_page > 0 ? req.query.origin_page : 1;
+    const per_page = req.query.per_page > 0 ? req.query.per_page : 5;
+    const pointer_position = req.query.pointer_position > 0 ? req.query.pointer_position : 0;
+    const response = await api.getPhotoesByFiltres(filtres, page, origin_page, per_page, pointer_position);
+    res.json(response);
+})
+
 
 // define the about route
 // router.get('/about', function(req, res) {
