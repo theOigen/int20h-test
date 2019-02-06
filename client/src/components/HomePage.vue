@@ -16,49 +16,49 @@
                     <li>
                       <a
                         href="#"
-                        @click.prevent="filterEmote('happiness')"
+                        @click.prevent="filterEmote({ emote: 'happiness', page: 1})"
                         :class="{ active: this.emoteString === 'happiness' }"
                       >happiness</a>
                     </li>
                     <li>
                       <a
                         href="#"
-                        @click.prevent="filterEmote('sadness')"
+                        @click.prevent="filterEmote({ emote: 'sadness', page: 1})"
                         :class="{ active: this.emoteString === 'sadness' }"
                       >sadness</a>
                     </li>
                     <li>
                       <a
                         href="#"
-                        @click.prevent="filterEmote('anger')"
+                        @click.prevent="filterEmote({ emote: 'anger', page: 1})"
                         :class="{ active: this.emoteString === 'anger' }"
                       >anger</a>
                     </li>
                     <li>
                       <a
                         href="#"
-                        @click.prevent="filterEmote('disgust')"
+                        @click.prevent="filterEmote({ emote: 'disgust', page: 1})"
                         :class="{ active: this.emoteString === 'disgust' }"
                       >disgust</a>
                     </li>
                     <li>
                       <a
                         href="#"
-                        @click.prevent="filterEmote('fear')"
+                        @click.prevent="filterEmote({ emote: 'fear', page: 1})"
                         :class="{ active: this.emoteString === 'fear' }"
                       >fear</a>
                     </li>
                     <li>
                       <a
                         href="#"
-                        @click.prevent="filterEmote('neutral')"
+                        @click.prevent="filterEmote({ emote: 'neutral', page: 1})"
                         :class="{ active: this.emoteString === 'neutral' }"
                       >neutral</a>
                     </li>
                     <li>
                       <a
                         href="#"
-                        @click.prevent="filterEmote('surprise')"
+                        @click.prevent="filterEmote({ emote: 'surprise', page: 1})"
                         :class="{ active: this.emoteString === 'surprise' }"
                       >surprise</a>
                     </li>
@@ -99,12 +99,16 @@
           </div>
           <!-- Pagination -->
           <pagination
-            v-if="photos.length"
+            v-if="photos.length || hasNextPage"
             class="center"
             :current="currPage"
             :total="totalPages"
             :page-range="pageRange"
+            :filtration='emoteString != ""'
+            :hasNextPage="hasNextPage"
+            :emote="emoteString"
             @page-changed="getPhotos"
+            @page-changed-filtration="filterEmote"
           ></pagination>
         </div>
       </div>
@@ -136,6 +140,7 @@ export default {
       currPage: -1,
       nextPage: -1,
       prevPage: -1,
+      hasNextPage: false,
       totalPages: 0,
       pageRange: 1,
       searchResult: "",
@@ -160,6 +165,7 @@ export default {
         const response = await this.$store.dispatch("getPhotos", { page });
         this.photos = response.photo;
         this.currPage = response.page;
+        
         this.nextPage =
           this.currPage + 1 < response.pages ? this.currPage + 1 : 0;
         this.prevPage = this.currPage - 1 > 0 ? this.currPage - 1 : 0;
@@ -171,10 +177,32 @@ export default {
       }
       this.isLoading = false;
     },
-    filterEmote(emote) {
+    async filterEmote({ emote, page }) {
+      //if emotion was selected by clicking on navbar, page = 1
       this.emoteString = emote;
       console.log(emote);
-      // todo filter by choosen emotion
+      try {
+        this.isLoading = true;
+        const response = await this.$store.dispatch("getPhotoesByFiltres", {
+          filtres: emote, // filtres is a string in format "emote1 emote2{ emoteN}"
+          page: page,
+        });
+        console.log('response', response);
+        this.currPage = response.page;
+        this.photos = response.photo;
+        this.nextPage = response.nextPhotoIsExist ? this.currPage + 1 : 0;
+        this.prevPage = this.currPage - 1 > 0 ? this.currPage - 1 : 0;
+        this.totalPages = 0;
+        this.hasNextPage = response.nextPhotoIsExist;
+        console.log('response.nextPhotoIsExist', response.nextPhotoIsExist)
+        for (const photo of this.photos)
+          photo.meta = await this.getMeta(photo.url);
+      }
+      catch (error) {
+        console.log("Error: ", error);
+      }
+      this.isLoading = false;
+
     },
     async clickedOnPhoto(photo) {
       if (this.isLoadingInfo || photo.id === this.selectedPhoto.id) return; // implement reject;

@@ -42,11 +42,25 @@ export default {
     pageRange: {
       type: Number,
       default: 2
+    },
+    filtration: {
+      type: Boolean,
+      default: false
+    },
+    hasNextPage: {
+      type: Boolean,
+      default: false
+    },
+    emote: {
+      type: String,
+      default: ""
     }
   },
   computed: {
     pages() {
       let pages = [];
+      console.log('computed/pages/this.rangeStart', this.rangeStart);
+      console.log('computed/pages/this.rangeEnd', this.rangeEnd);
       for (let i = this.rangeStart; i <= this.rangeEnd; i++) {
         pages.push(i);
       }
@@ -62,7 +76,7 @@ export default {
     },
     rangeEnd() {
       let end = this.current + this.pageRange;
-      return end < this.total ? end : this.total;
+      return this.filtration ? this.hasNextPage ? end : this.current : end < this.total ? end : this.total;
     },
     nextPage() {
       return this.current + 1;
@@ -75,9 +89,11 @@ export default {
     hasFirst() {
       return this.rangeStart !== 1;
     },
+    //Не нужно
     hasLast() {
       return this.rangeEnd < this.total;
     },
+    //
     hasFirstDots() {
       if (this.rangeStart <= 2) {
         return false;
@@ -86,21 +102,31 @@ export default {
       }
     },
     hasLastDots() {
-      if (this.rangeEnd >= this.total - 1) {
+      return this.filtration ? this.hasNextPage : this.rangeEnd < this.total - 1;
+      /*if (this.rangeEnd >= this.total - 1) {
         return false;
       } else {
         return true;
-      }
+      }*/
     },
     hasPrev() {
       return this.current > 1;
     },
     hasNext() {
-      return this.current < this.total;
+      return this.filtration ? this.hasNextPage : this.current < this.total;
     },
     changePage(page) {
-      this.$emit("page-changed", page);
+      console.log('this.filtration', this.filtration)
+      if (this.filtration)
+        this.$emit("page-changed-filtration", { emote: this.emote, page: page});
+      else
+        this.$emit("page-changed", page);
     }
+    /*
+      Комментарий от Симбы:
+
+              "hasLastDots и hasNext. Проверьте предназначение! Зачем вычислять по-разному проверки для следующей точки и для стрелки Вперед?"
+    */
   }
 };
 </script>

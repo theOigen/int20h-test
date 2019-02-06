@@ -126,6 +126,85 @@ class Api {
         }
         return result;
     }
+    
+
+
+    static async getPhotoesByFiltres(filtres, page = 1, origin_page = 1, per_page = 5, pointer_position = 0) {
+        /*
+         * page - page of list with filtres
+         * origin_page - page of origin list without filtres that contains last photo of last set
+         * pointer_position - position of first available photo
+         */
+        console.log(`per_page + 1 = ${Number(per_page) + 1}`)
+        console.log(`params:\nfiltres = ${filtres}\npage = ${page}\norigin_page = ${origin_page}\nper_page = ${per_page}\npointer_position = ${pointer_position}`);
+        pointer_position = pointer_position % per_page;
+        let number_of_selected_photos = 0;
+        const photos = [];
+        let photoset; // will contain the resulting info about pages
+        while (number_of_selected_photos != Number(per_page) + 1 && !(photoset && photoset.error && photoset.photos.photo.length == 0)) {
+            photoset = await this.getPhotos(origin_page, per_page);
+            console.log('photoset.photos.photo.length = ' + photoset.photos.photo.length);
+            if (photoset.error || photoset.photos.photo.length == 0)
+                break;
+            photoset.photos.photo = photoset.photos.photo.slice(pointer_position);
+            pointer_position = 0; // for first round of cycle
+            console.log(`Begining of analyzing on origin page ${origin_page}`)
+            await this.analyzePhotoSetAndModify(photoset.photos.photo);
+            for (let photo of photoset.photos.photo) {
+                let filtres_copy = filtres.slice();
+                for (let face of photo.faces_info) {
+                    console.log('face ' + face);
+                    const index = filtres_copy.indexOf(face.emotion);
+                    if (index != -1) {
+                        filtres_copy.splice(index, 1);
+                    }
+                    if (filtres_copy.length == 0)
+                        break;
+                }
+                //if all amotion in filtres there are in the photo               
+                if (filtres_copy.length == 0) {
+                    console.log("PHOTO WAS FOUNDED")
+                    // if we dont search photo to next set
+                    if (number_of_selected_photos != per_page)
+                        photos.push(photo);
+                    number_of_selected_photos++;
+                    console.log(`number_of_selected_photos = ${number_of_selected_photos}`)
+                }
+                if (number_of_selected_photos == Number(per_page) + 1)
+                    break;
+                pointer_position++; // position in page of not analyzed photo
+            }
+            //bad code
+            if (number_of_selected_photos == Number(per_page) + 1)
+                break;
+            origin_page++; 
+            pointer_position = 0;
+        }
+        //registration of result
+        if (!photoset) {
+            //in that case: per_page=0
+            photoset = {
+                error: "400 Bad request",
+            }
+        }
+        if (photoset.error) {
+            photoset.photos = undefined;
+            return photoset;
+        }
+        const result = {
+            photos: {
+                page: Number(page),
+                nextPhotoIsExist: number_of_selected_photos === Number(per_page) + 1,
+                pageOfNextPhoto: origin_page,
+                pointerOfNextPhotoOnPage: pointer_position,
+                photo: photos
+            }
+        }
+        return result;
+    }
 }
+
+
+
 
 module.exports = Api;
