@@ -34,7 +34,7 @@ class Api {
                     const max_emotion = this.analyzeEmotion(face.attributes.emotion);
                     face.emotion = max_emotion;
                 } else face.emotion = "none";
-                face.attributes = face.face_token = undefined; // delete unused fields
+                face.attributes = undefined; // delete unused fields
             }
             //console.log(response.data);
         } catch (error) {

@@ -47,12 +47,14 @@
       <div v-if="!isLoading" class="col-md-9 col-md-offset-3">
         <!-- Page Content -->
         <div class="photos">
-          <div v-for="photo in photos" :key="photo.id" class="photo-item">
+          <div v-for="photo in photos" :key="photo.id" :ref="'photo'+photo.id" class="photo-item">
             <a href="#" @click.prevent="clickedOnPhoto(photo)">
               <div v-if="photo.id === selectedPhoto.id && !isLoadingInfo ">
+                <div v-for="face in selectedPhoto.faces_info" :key="face.face_token" :style="calculateFaceClass(face, photo)">
+                </div>
                 <img :src="photo.url" alt>
               </div>
-               <div v-else-if="photo.id === selectedPhoto.id && isLoadingInfo ">
+              <div v-else-if="photo.id === selectedPhoto.id && isLoadingInfo ">
                 <div class="blur-text">Loading...</div>
                 <img :src="photo.url" alt class="blur">
               </div>
@@ -122,6 +124,8 @@ export default {
           this.currPage + 1 < response.pages ? this.currPage + 1 : 0;
         this.prevPage = this.currPage - 1 > 0 ? this.currPage - 1 : 0;
         this.totalPages = response.pages;
+        for (const photo of this.photos)
+          photo.meta = await this.getMeta(photo.url)
       } catch (error) {
         console.log("Error: ", error);
       }
@@ -132,27 +136,83 @@ export default {
       console.log(emote);
     },
     async clickedOnPhoto(photo) {
-      if(this.isLoadingInfo 
-      || photo.id === this.selectedPhoto.id) return; // implement reject;
+      if (this.isLoadingInfo
+        || photo.id === this.selectedPhoto.id) return; // implement reject;
       console.log(photo.id);
       this.selectedPhoto = photo;
       let isCashed = this.selectedPhoto.faces_info;
 
-      
-      if(!isCashed) try {
+      if (!isCashed) try {
         this.isLoadingInfo = true;
         const response = await this.$store.dispatch("getPhotoInfo", photo.url);
-        this.selectedPhoto.faces_info = response.faces; 
+        this.selectedPhoto.faces_info = response.faces;
         this.addFaceInfoToCash(this.selectedPhoto.id, response.faces);
       } catch (error) {
         console.log("Error: ", error);
-      }else console.log("Already cashed");
+      } else console.log("Already cashed");
       this.isLoadingInfo = false;
       console.log(this.selectedPhoto.faces_info);
     },
-    addFaceInfoToCash(photoId, faces_info){
-      const cashedPhoto = this.photos.find(photo => photo.id === photoId );
-      if(cashedPhoto) cashedPhoto.faces_info = faces_info;
+    addFaceInfoToCash(photoId, faces_info) {
+      const cashedPhoto = this.photos.find(photo => photo.id === photoId);
+      if (cashedPhoto) cashedPhoto.faces_info = faces_info;
+    },
+    calculateFaceClass(face, photo) {
+      let { width, top, left, height } = face.face_rectangle
+      const photo_element = this.$refs['photo'+photo.id];
+      const newWidth = photo_element[0].clientWidth;
+      const newHeight = photo_element[0].clientHeight;
+      const oldWidth = photo.meta.width;
+      const oldHeigth = photo.meta.height;
+
+      width = this.scale(width, 0, oldWidth, 0, newWidth);
+      left = this.scale(left, 0, oldWidth, 0, newWidth);
+      height = this.scale(height, 0, oldHeigth, 0, newHeight);
+      top = this.scale(top, 0, oldHeigth, 0, newHeight);
+
+
+      console.log("HEIGT OLD" + oldHeigth + " NEW " + newHeight);
+      console.log("WIDTH OLD" + oldWidth + " NEW " + newWidth);
+      const position_str = `width: ${width}px; height:${height}px; left: ${left}px; top: ${top}px;`;
+      return `position: absolute; outline: 2px solid ${this.calculateFaceColor(face.emotion)}; ` + position_str;
+    },
+    calculateFaceColor(emotion) {
+      switch (emotion) {
+        case "anger":
+          return "red";
+          break;
+        case "neutral":
+          return "white";
+          break;
+        case "disgust":
+          return "green";
+          break;
+        case "fear":
+          return "violet";
+          break;
+        case "happiness":
+          return "yellow";
+          break;
+        case "sadness":
+          return "skyblue";
+          break;
+        case "surprise":
+          return "magenta";
+          break;
+        default:
+          return "gray";
+      }
+    },
+    async getMeta(url) {
+      return new Promise((resolve, reject) => {
+        let img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+    },
+    scale(num, in_min, in_max, out_min, out_max) {
+      return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
   }
 };
@@ -293,7 +353,7 @@ a {
 
 img {
   max-width: 100%;
-  height: auto;
+  /*height: auto;*/
   vertical-align: middle;
   border: 0;
 }
