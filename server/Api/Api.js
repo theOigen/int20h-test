@@ -1,7 +1,7 @@
 const Flickr = require("flickr-sdk");
 const axios = require("axios");
 const config = require("../config");
-
+const _ = require("underscore");
 const flickr = new Flickr(config.flickr_api_key);
 const API_RATE_LIMIT = 3; // 3 async request is working fine
 
@@ -48,12 +48,12 @@ class Api {
         let infoArr = [];
         for (let i = 0; i < photos.length; i += API_RATE_LIMIT) {
             const analyzeProms = [];
-            for (let rate_counter = 0; rate_counter < API_RATE_LIMIT && i+rate_counter< photos.length; rate_counter++)
-                analyzeProms.push(this.analyzePhoto(this.mapPhotoToURL(photos[i + rate_counter], "c")))
+            for (let rate_counter = 0; rate_counter < API_RATE_LIMIT
+                && i + rate_counter < photos.length; rate_counter++)
+                analyzeProms.push(this.analyzePhoto(this.mapPhotoToURL(photos[i + rate_counter], "c")));
             const partInfoArr = await Promise.all(analyzeProms);
             infoArr = infoArr.concat(partInfoArr);
         }
-        
         for (const index in infoArr) {
             if (infoArr[index].error) {
                 throw new Error(infoArr[index].error.message);
@@ -65,7 +65,7 @@ class Api {
 
 
     static mapPhotoToURL(photo, size_suffix = "b") {  // 1024 on large side by default, for the original image use 'o'
-        const { farm, server, id, secret, originalsecret, originalformat } = photo;
+        const { farm, server, id, secret, originalsecret, originalformat = "jpg" } = photo;
         const photo_secret = size_suffix === "o" ? originalsecret : secret;
         return `https://farm${farm}.staticflickr.com/${server}/${id}_${photo_secret}_${size_suffix}.${originalformat}`;
     }
@@ -89,13 +89,37 @@ class Api {
             error: null
         };
         try {
-            const raw_response = await flickr.photos.search({ text: 'int20h', page, per_page, extras: "original_format" });
+
+            const [raw_response, raw_response_from_album] = await Promise.all([
+                flickr.photos.search({
+                    text: 'int20h',
+                    privacy_filter: 1, page, per_page,
+                    extras: "original_format"
+                }),
+                flickr.photosets.getPhotos({
+                    photoset_id: config.album_id,
+                    user_id: config.user_id, page, per_page,
+                    privacy_filter: 1, media: 'photos'
+                })
+            ]);
+            // console.log(raw_response_from_album);
             const response = raw_response.body.photos;
+            const response_2 = raw_response_from_album.body.photoset;
             response.photo = response.photo.map(photo => {
                 photo.url = this.mapPhotoToURL(photo);
                 return photo;
             });
+            response_2.photo = response_2.photo.map(photo => {
+                photo.url = this.mapPhotoToURL(photo);
+                return photo;
+            });
+
+            const mergedList = _.map(response.photo, (item) => {
+                return _.extend(item, _.findWhere(response_2.photo, { id: item.id }));
+            });
+
             result.photos = response;
+            result.photos.photo = mergedList;
         } catch (error) {
             console.error(error);
             result.error = error;
