@@ -26,5 +26,13 @@ export const store = new Vuex.Store({
                 throw new Error(response.data.error);
             return response.data.photos;
         },
+        async getPhotoInfo(context, photo_url) {
+            console.log(photo_url);
+            const response = await axios.post('/api/v1/detect', {photo_url});
+            console.log('response from server:', response);
+            if (response.data.error)
+                throw new Error(response.data.error);
+            return response.data.info;
+        }
     }
 });
