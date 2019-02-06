@@ -65,7 +65,7 @@ class Api {
 
 
     static mapPhotoToURL(photo, size_suffix = "b") {  // 1024 on large side by default, for the original image use 'o'
-        const { farm, server, id, secret, originalsecret, originalformat = "jpg" } = photo;
+        const { farm, server, id, secret, originalsecret, originalformat } = photo;
         const photo_secret = size_suffix === "o" ? originalsecret : secret;
         return `https://farm${farm}.staticflickr.com/${server}/${id}_${photo_secret}_${size_suffix}.${originalformat}`;
     }
@@ -92,17 +92,17 @@ class Api {
 
             const [raw_response, raw_response_from_album] = await Promise.all([
                 flickr.photos.search({
-                    text: 'int20h',
+                    text: '#int20h',
                     privacy_filter: 1, page, per_page,
                     extras: "original_format"
                 }),
                 flickr.photosets.getPhotos({
                     photoset_id: config.album_id,
                     user_id: config.user_id, page, per_page,
-                    privacy_filter: 1, media: 'photos'
+                    privacy_filter: 1, media: 'photos',
+                    extras: "original_format"
                 })
             ]);
-            // console.log(raw_response_from_album);
             const response = raw_response.body.photos;
             const response_2 = raw_response_from_album.body.photoset;
             response.photo = response.photo.map(photo => {
