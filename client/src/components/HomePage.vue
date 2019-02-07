@@ -104,7 +104,7 @@
             :current="currPage"
             :total="totalPages"
             :page-range="pageRange"
-            :filtration='emoteString != ""'
+            :filtration="emoteString !== ''"
             :hasNextPage="hasNextPage"
             :emote="emoteString"
             @page-changed="getPhotos"
@@ -165,7 +165,6 @@ export default {
         const response = await this.$store.dispatch("getPhotos", { page });
         this.photos = response.photo;
         this.currPage = response.page;
-        
         this.nextPage =
           this.currPage + 1 < response.pages ? this.currPage + 1 : 0;
         this.prevPage = this.currPage - 1 > 0 ? this.currPage - 1 : 0;
@@ -185,24 +184,22 @@ export default {
         this.isLoading = true;
         const response = await this.$store.dispatch("getPhotoesByFiltres", {
           filtres: emote, // filtres is a string in format "emote1 emote2{ emoteN}"
-          page: page,
+          page: page
         });
-        console.log('response', response);
+        console.log("response", response);
         this.currPage = response.page;
         this.photos = response.photo;
         this.nextPage = response.nextPhotoIsExist ? this.currPage + 1 : 0;
         this.prevPage = this.currPage - 1 > 0 ? this.currPage - 1 : 0;
         this.totalPages = 0;
         this.hasNextPage = response.nextPhotoIsExist;
-        console.log('response.nextPhotoIsExist', response.nextPhotoIsExist)
+        console.log("response.nextPhotoIsExist", response.nextPhotoIsExist);
         for (const photo of this.photos)
           photo.meta = await this.getMeta(photo.url);
-      }
-      catch (error) {
+      } catch (error) {
         console.log("Error: ", error);
       }
       this.isLoading = false;
-
     },
     async clickedOnPhoto(photo) {
       if (this.isLoadingInfo || photo.id === this.selectedPhoto.id) return; // implement reject;
