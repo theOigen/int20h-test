@@ -40,7 +40,7 @@ router.get('/filtre', async (req, res) => {
     const pointer_position = req.query.pointer_position > 0 ? req.query.pointer_position : 0;
     const response = await api.getPhotoesByFiltres(filtres, page, origin_page, per_page, pointer_position);
     res.json(response);
-})
+});
 
 
 // define the about route
