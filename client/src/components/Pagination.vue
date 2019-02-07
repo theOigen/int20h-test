@@ -59,8 +59,8 @@ export default {
   computed: {
     pages() {
       let pages = [];
-      console.log('computed/pages/this.rangeStart', this.rangeStart);
-      console.log('computed/pages/this.rangeEnd', this.rangeEnd);
+      console.log("computed/pages/this.rangeStart", this.rangeStart);
+      console.log("computed/pages/this.rangeEnd", this.rangeEnd);
       for (let i = this.rangeStart; i <= this.rangeEnd; i++) {
         pages.push(i);
       }
@@ -76,7 +76,13 @@ export default {
     },
     rangeEnd() {
       let end = this.current + this.pageRange;
-      return this.filtration ? this.hasNextPage ? end : this.current : end < this.total ? end : this.total;
+      return this.filtration
+        ? this.hasNextPage
+          ? end
+          : this.current
+        : end < this.total
+        ? end
+        : this.total;
     },
     nextPage() {
       return this.current + 1;
@@ -102,7 +108,9 @@ export default {
       }
     },
     hasLastDots() {
-      return this.filtration ? this.hasNextPage : this.rangeEnd < this.total - 1;
+      return this.filtration
+        ? this.hasNextPage
+        : this.rangeEnd < this.total - 1;
       /*if (this.rangeEnd >= this.total - 1) {
         return false;
       } else {
@@ -116,11 +124,13 @@ export default {
       return this.filtration ? this.hasNextPage : this.current < this.total;
     },
     changePage(page) {
-      console.log('this.filtration', this.filtration)
+      console.log("this.filtration", this.filtration);
       if (this.filtration)
-        this.$emit("page-changed-filtration", { emote: this.emote, page: page});
-      else
-        this.$emit("page-changed", page);
+        this.$emit("page-changed-filtration", {
+          emote: this.emote,
+          page: page
+        });
+      else this.$emit("page-changed", page);
     }
     /*
       Комментарий от Симбы:
