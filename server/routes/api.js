@@ -12,6 +12,7 @@ router.get('/photos', async (req, res) => {
     const response = !is_raw ?
         await api.getAnalyzedPhotos(page, per_page) :
         await api.getPhotos(page, per_page);
+    // console.log(response.photos.photo);
     res.json(response);
 });
 
@@ -32,18 +33,13 @@ router.post('/detect', async (req, res) => {
     res.json(response);
 });
 
-router.get('/filtre', async (req, res) => {
-    const filtres = req.query.filtres.split(" ");
+router.get('/filter', async (req, res) => {
+    const filters = req.query.filters.split(" ");
     const page = req.query.page > 0 ? Number(req.query.page) : 1;
     const per_page = req.query.per_page > 0 ? Number(req.query.per_page) : 5;
-    const response = await api.getPhotoesByFiltres(filtres, page, per_page);
+    const response = await api.getPhotosByFilters(filters, page, per_page);
     res.json(response);
 });
-
-router.get('/test', async (req, res) => {
-    
-    res.json(await api.equalizeDbAndFlicr());
-})
 
 // define the about route
 // router.get('/about', function(req, res) {

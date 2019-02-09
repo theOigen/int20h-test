@@ -7,7 +7,7 @@ module.exports = {
         return AnalyzedPhotoModel.find();
     },
     getByUrl(url) {
-        return AnalyzedPhotoModel.findOne({ url: url })
+        return AnalyzedPhotoModel.findOne({ url: url });
     },
     insert: function (AnalyzedPhoto) {
         const mod = new AnalyzedPhotoModel(AnalyzedPhoto);

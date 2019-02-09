@@ -2,7 +2,7 @@
   <div class="container">
     <div class="row">
       <!--  Filtration  -->
-      <div class="col-md-3">
+      <div class="col-md-3 col-xs-3">
         <div class="header affix">
           <div class="table">
             <div class="table-cell">
@@ -17,49 +17,49 @@
                       <a
                         href="#"
                         @click.prevent="filterEmote({ emote: 'happiness', page: 1})"
-                        :class="{ active: this.emoteString === 'happiness' }"
+                        :class="{ active: emotes.includes('happiness') }"
                       >happiness</a>
                     </li>
                     <li>
                       <a
                         href="#"
                         @click.prevent="filterEmote({ emote: 'sadness', page: 1})"
-                        :class="{ active: this.emoteString === 'sadness' }"
+                        :class="{ active: emotes.includes('sadness') }"
                       >sadness</a>
                     </li>
                     <li>
                       <a
                         href="#"
                         @click.prevent="filterEmote({ emote: 'anger', page: 1})"
-                        :class="{ active: this.emoteString === 'anger' }"
+                        :class="{ active: emotes.includes('anger') }"
                       >anger</a>
                     </li>
                     <li>
                       <a
                         href="#"
                         @click.prevent="filterEmote({ emote: 'disgust', page: 1})"
-                        :class="{ active: this.emoteString === 'disgust' }"
+                        :class="{ active: emotes.includes('disgust') }"
                       >disgust</a>
                     </li>
                     <li>
                       <a
                         href="#"
                         @click.prevent="filterEmote({ emote: 'fear', page: 1})"
-                        :class="{ active: this.emoteString === 'fear' }"
+                        :class="{ active: emotes.includes('fear') }"
                       >fear</a>
                     </li>
                     <li>
                       <a
                         href="#"
                         @click.prevent="filterEmote({ emote: 'neutral', page: 1})"
-                        :class="{ active: this.emoteString === 'neutral' }"
+                        :class="{ active: emotes.includes('neutral') }"
                       >neutral</a>
                     </li>
                     <li>
                       <a
                         href="#"
                         @click.prevent="filterEmote({ emote: 'surprise', page: 1})"
-                        :class="{ active: this.emoteString === 'surprise' }"
+                        :class="{ active: emotes.includes('surprise') }"
                       >surprise</a>
                     </li>
                   </ul>
@@ -72,9 +72,9 @@
           </div>
         </div>
       </div>
-      <div v-if="!isLoading" class="col-md-9 col-md-offset-3">
+      <div v-if="!isLoading" class="col-md-9 col-xs-9">
         <!-- Page Content -->
-        <div class="photos">
+        <div v-if="photos.length > 0" class="photos">
           <div v-for="photo in photos" :key="photo.id" :ref="`photo${photo.id}`" class="photo-item">
             <a href="#" @click.prevent="clickedOnPhoto(photo)">
               <div v-if="photo.id === selectedPhoto.id && !isLoadingInfo ">
@@ -82,6 +82,7 @@
                   v-for="face in selectedPhoto.faces_info"
                   :key="face.face_token"
                   :style="calculateFaceClass(face, photo)"
+                  :title="face.emotion"
                 ></div>
                 <img :src="photo.url" alt>
               </div>
@@ -104,13 +105,14 @@
             :current="currPage"
             :total="totalPages"
             :page-range="pageRange"
-            :filtration="emoteString !== ''"
+            :filtration="emotes.length !== 0"
             :hasNextPage="hasNextPage"
-            :emote="emoteString"
+            :emotes="emotes"
             @page-changed="getPhotos"
             @page-changed-filtration="filterEmote"
           ></pagination>
         </div>
+        <div v-else>Opsie, no photos</div>
       </div>
       <div v-else class="lds-place">
         <div class="lds-ring">
@@ -146,7 +148,7 @@ export default {
       searchResult: "",
       isLoading: false,
       isLoadingInfo: false,
-      emoteString: ""
+      emotes: []
     };
   },
   mounted() {
@@ -178,17 +180,28 @@ export default {
     },
     async filterEmote({ emote, page }) {
       //if emotion was selected by clicking on navbar, page = 1
-      this.emoteString = emote;
-      console.log(emote);
+      const emoteIndex = this.emotes.findIndex(el => el === emote);
+      if (emote !== undefined && emoteIndex < 0) {
+        this.emotes.push(emote);
+      } else if (emote !== undefined && emoteIndex >= 0) {
+        this.emotes.splice(emoteIndex, 1);
+      }
+      if (this.emotes.length === 0) {
+        return this.getPhotos(1);
+      }
       try {
         this.isLoading = true;
-        const response = await this.$store.dispatch("getPhotoesByFiltres", {
-          filtres: emote, // filtres is a string in format "emote1 emote2{ emoteN}"
+        const response = await this.$store.dispatch("getPhotosByFilters", {
+          filters: this.emotes.join(" "), // filtres is a string in format "emote1 emote2 ... emoteN"
           page: page
         });
         console.log("response", response);
         this.currPage = response.page;
         this.photos = response.photo;
+        if (this.photos.length === 0) {
+          this.isLoading = false;
+          return;
+        }
         this.nextPage = response.nextPhotoIsExist ? this.currPage + 1 : 0;
         this.prevPage = this.currPage - 1 > 0 ? this.currPage - 1 : 0;
         this.totalPages = 0;
@@ -200,6 +213,8 @@ export default {
         console.log("Error: ", error);
       }
       this.isLoading = false;
+      this.selectedPhoto = {};
+      this.isLoadingInfo = false;
     },
     async clickedOnPhoto(photo) {
       if (this.isLoadingInfo || photo.id === this.selectedPhoto.id) return; // implement reject;
@@ -227,8 +242,11 @@ export default {
       if (cashedPhoto) cashedPhoto.faces_info = faces_info;
     },
     calculateFaceClass(face, photo) {
-      let { width, top, left, height } = face.face_rectangle;
+      let { width, top, left, height } = face.face_rectangle[0];
       const photo_element = this.$refs["photo" + photo.id];
+
+      if (!photo_element[0]) return;
+
       const newWidth = photo_element[0].clientWidth;
       const newHeight = photo_element[0].clientHeight;
       const oldWidth = photo.meta.width;
@@ -239,8 +257,8 @@ export default {
       height = this.scale(height, 0, oldHeigth, 0, newHeight);
       top = this.scale(top, 0, oldHeigth, 0, newHeight);
 
-      console.log("HEIGT OLD" + oldHeigth + " NEW " + newHeight);
-      console.log("WIDTH OLD" + oldWidth + " NEW " + newWidth);
+      console.log(`HEIGHT OLD ${oldHeigth} NEW ${newHeight}`);
+      console.log(`WIDTH OLD ${oldWidth} NEW ${newWidth}`);
       const position_str = `width: ${width}px; height:${height}px; left: ${left}px; top: ${top}px;`;
       return `position: absolute; outline: 2px solid ${this.calculateFaceColor(
         face.emotion
@@ -298,6 +316,11 @@ export default {
   top: 0;
   text-align: right;
   z-index: 9;
+}
+
+.emotion {
+  position: relative;
+  background-color: #000;
 }
 
 .affix {

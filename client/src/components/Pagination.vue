@@ -51,9 +51,9 @@ export default {
       type: Boolean,
       default: false
     },
-    emote: {
-      type: String,
-      default: ""
+    emotes: {
+      type: Array,
+      default: []
     }
   },
   computed: {
@@ -127,7 +127,7 @@ export default {
       console.log("this.filtration", this.filtration);
       if (this.filtration)
         this.$emit("page-changed-filtration", {
-          emote: this.emote,
+          emote: undefined,
           page: page
         });
       else this.$emit("page-changed", page);
