@@ -7,7 +7,8 @@ const config = {
     user_id: "144522605@N06",
     album_id: "72157674388093532",
     fpp_api_key: "6cbxOJD1SNpMurRFJ0W9IOBYJAd76THI",
-    fpp_secret: "Am99rkBpVebGCnYg33DDgTveyyRW0kec"
+    fpp_secret: "Am99rkBpVebGCnYg33DDgTveyyRW0kec",
+    database_url: "mongodb://heroku_user:porter2556@ds249873.mlab.com:49873/lab6db"
 };
 
 module.exports = config;

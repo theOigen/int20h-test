@@ -3,6 +3,8 @@ const morgan = require('morgan');
 const cors = require('cors');
 const PORT = require('./config').PORT;
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const config = require("./config");
 
 const app = express();
 app.use(morgan('dev'));
@@ -10,8 +12,12 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+mongoose.connect(config.database_url, { useNewUrlParser: true })
+    .then(() => console.log(`Database connected: ${config.database_url}`))
+    .then(() => {
+        app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+    })
+    .catch(err => console.log(`Status error: ${err}`));
 
 const api_v1 = require('./routes/api');
 
