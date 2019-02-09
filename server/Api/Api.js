@@ -2,8 +2,34 @@ const Flickr = require("flickr-sdk");
 const axios = require("axios");
 const config = require("../config");
 const _ = require("underscore");
+const DB_analyzedPhotos = require('../database/model');
+
 const flickr = new Flickr(config.flickr_api_key);
 const API_RATE_LIMIT = 3; // 3 async request is working fine
+
+function pagination(array, page, per_page) {
+    page = Number(page);
+    per_page = Number(per_page);
+    const delta = array.length % per_page == 0 ? 0 : 1;
+    const maxPage = parseInt(array.length / per_page) + delta;
+    if (page > maxPage) page = maxPage;
+    let bound = page * per_page;
+    if (bound > array.length) bound = array.length;
+    return {
+        resultOfPagination: array.slice(per_page * (page - 1), bound),
+        page: page,
+        maxPage: maxPage
+    };
+}
+function PhotoCompare(a, b) {
+    if (a.addingDate > b.addingDate) {
+        return 1;
+    }
+    if (a.addingDate < b.addingDate) {
+        return -1;
+    }
+    return 0;
+}
 
 class Api {
     static analyzeEmotion(emotion) {
@@ -19,7 +45,11 @@ class Api {
             info: {},
             error: null
         };
-        try {
+        const analyzedPhoto = await DB_analyzedPhotos.getByUrl(photo_url);
+        if (analyzedPhoto) {
+            result.info.faces = analyzedPhoto.faces_info;
+        }
+        else try {
             const response = await axios.post('https://api-us.faceplusplus.com/facepp/v3/detect', null, {
                 params: {
                     api_key: config.fpp_api_key,
@@ -70,18 +100,24 @@ class Api {
         return `https://farm${farm}.staticflickr.com/${server}/${id}_${photo_secret}_${size_suffix}.${originalformat}`;
     }
     static async getAnalyzedPhotos(page = 1, per_page = 5) {
-        let result = {
-            photos: null,
-            error: null
-        };
         try {
-            result = await this.getPhotos(page, per_page);
-            await this.analyzePhotoSetAndModify(result.photos.photo);
-        } catch (error) {
-            console.error(error);
-            result.error = error.message;
+            this.equalizeDbAndFlicr();
         }
-        return result;
+        catch (error) {
+            return { error: error };
+        }
+        let allPhotos = (await DB_analyzedPhotos.getAll()).sort(PhotoCompare);
+        const total = allPhotos.length;
+        allPhotos = pagination(allPhotos, page, per_page);
+        return {
+            "photos": {
+                "page": allPhotos.page,
+                "pages": allPhotos.maxPage,
+                "perpage": per_page,
+                "total": total,
+                "photo": allPhotos.resultOfPagination
+            }
+        }
     }
     static async getPhotos(page = 1, per_page = 5) {
         const result = {
@@ -123,85 +159,81 @@ class Api {
 
 
 
-    static async getPhotoesByFiltres(filtres, page = 1, origin_page = 1, per_page = 5, pointer_position = 0) {
-        /*
-         * page - page of list with filtres
-         * origin_page - page of origin list without filtres that contains last photo of last set
-         * pointer_position - position of first available photo
-         */
-        const per_page_num = Number(per_page);
-
-        /* console.log(`per_page + 1 = ${per_page_num + 1}`);
-        console.log(`params:\nfiltres = ${filtres}\npage = ${page}\norigin_page = ${origin_page}
-            \rper_page = ${per_page}\npointer_position = ${pointer_position}`);
-        */
-        pointer_position %= per_page;
-
-        let number_of_selected_photos = 0;
-        const photos = [];
-        let photoset = null; // will contain the resulting info about pages
-
-        WhileCycle: while (number_of_selected_photos !== per_page_num + 1
-            && !(photoset && photoset.error && photoset.photos.photo.length === 0)) {
-
-            photoset = await this.getPhotos(origin_page, per_page);
-            // console.log('photoset.photos.photo.length = ' + photoset.photos.photo.length);
-            if (photoset.error || photoset.photos.photo.length === 0)
-                break;
-
-            photoset.photos.photo = photoset.photos.photo.slice(pointer_position);
-            pointer_position = 0; // for first round of cycle
-            // console.log(`Begining of analyzing on origin page ${origin_page}`);
-            await this.analyzePhotoSetAndModify(photoset.photos.photo);
-
-            for (const photo of photoset.photos.photo) {
-                let filtres_copy = filtres.slice();
-                for (const face of photo.faces_info) {
-                    // console.log(`face ${face}`);
-                    const index = filtres_copy.indexOf(face.emotion);
-                    if (index !== -1) {
-                        filtres_copy.splice(index, 1);
-                    }
-                    if (filtres_copy.length === 0) break;
+    static async getPhotoesByFiltres(filtres, page = 1, per_page = 5) {
+        try {
+            this.equalizeDbAndFlicr();
+        }
+        catch (error) {
+            return { error: error };
+        }
+        const allPhotos = (await DB_analyzedPhotos.getAll()).sort(PhotoCompare);
+        let availablePhotos = [];
+        for (const photo of allPhotos) {
+            let filtres_copy = filtres.slice();
+            for (const face of photo.faces_info) {
+                const index = filtres_copy.indexOf(face.emotion);
+                if (index !== -1) {
+                    console.log('there is an emotion!')
+                    console.log(`before` + filtres_copy)
+                    filtres_copy.splice(index, 1);
+                    console.log('after' + filtres_copy)
                 }
-                //if all amotion in filtres there are in the photo
-                if (filtres_copy.length === 0) {
-                    // console.log("PHOTO WAS FOUNDED");
-                    // if we dont search photo to next set
-                    if (number_of_selected_photos !== per_page_num)
-                        photos.push(photo);
-                    number_of_selected_photos++;
-                    // console.log(`number_of_selected_photos = ${number_of_selected_photos}`);
-                }
-                if (number_of_selected_photos === per_page_num + 1)
-                    break WhileCycle;
-                pointer_position++; // position in page of not analyzed photo
+                if (filtres_copy.length === 0) break;
             }
-            //bad code
-            origin_page++;
-            pointer_position = 0;
+            //if all amotion in filtres there are in the photo
+            if (filtres_copy.length === 0) {
+                availablePhotos.push(photo);
+            }
         }
-        //registration of result
-        if (!photoset) {
-            //in that case: per_page = 0
-            photoset = {
-                error: "400 Bad request",
-            };
-        }
-        if (photoset.error) {
-            photoset.photos = undefined;
-            return photoset;
-        }
-        const result = {
+        console.log(`All ${allPhotos.length}; detected ${availablePhotos.length}`)
+        availablePhotos = pagination(availablePhotos, page, per_page);
+        return {
             photos: {
-                page: Number(page),
-                nextPhotoIsExist: number_of_selected_photos === per_page_num + 1,
-                pageOfNextPhoto: origin_page,
-                pointerOfNextPhotoOnPage: pointer_position,
-                photo: photos
+                page: availablePhotos.page,
+                nextPhotoIsExist: availablePhotos.maxPage !== availablePhotos.page,
+                photo: availablePhotos.resultOfPagination
             }
         };
-        return result;
+    }
+    static async getAllPhotos() {
+        let allPhotos = {
+            "photos": [],
+            "error": null
+        }
+        let photoset = null; 
+        let page = 1;
+        while (!photoset || photoset.photos.photo.length !== 0) {
+            photoset = await this.getPhotos(page, 500);
+            if (photoset.error) {
+                console.log("Error detected in function getAllPhotos()")
+                allPhotos.photos = null;
+                allPhotos.error = photoset.error;
+                return allPhotos;
+            }
+            allPhotos.photos = allPhotos.photos.concat(photoset.photos.photo);
+            page++;
+        }
+        console.log(`Found ${allPhotos.photos.length} photos`)
+        return allPhotos;
+    }
+    static async equalizeDbAndFlicr() {
+        
+        const flickrPhotos = await this.getAllPhotos();
+        if (flickrPhotos.error)
+            throw new Error(flickrPhotos.error);
+        const dbPhotos = await DB_analyzedPhotos.getAll();
+        for (let photo of flickrPhotos.photos) {
+            if (!dbPhotos.find(x => x.id === photo.id)) {
+                photo.faces_info = (await this.analyzePhoto(photo.url)).info.faces;
+                await DB_analyzedPhotos.insert(photo);
+            }
+        }
+        for (let photo of dbPhotos) {
+            if (!flickrPhotos.photos.find(x => x.id === photo.id)) {
+                console.log('Found removed from Flickr photo, but existing in the database');
+                await DB_analyzedPhotos.delete(photo.id);
+            }
+        }
     }
 }
 
