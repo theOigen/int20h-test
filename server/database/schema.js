@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-let Schema = mongoose.Schema;
+
 const AnalyzedPhotoSchema = new mongoose.Schema({
     id: { type: String, require: true },
     owner: { type: String, require: true },
@@ -15,7 +15,7 @@ const AnalyzedPhotoSchema = new mongoose.Schema({
     isfamily: { type: Number, default: 0 },
     addingDate: { type: Date, default: Date.now },
     faces_info: [{
-        face_token: { type: String, require: true  },
+        face_token: { type: String, require: true },
         emotion: { type: String, require: true },
         face_rectangle: [{
             width: { type: Number, default: 0 },
@@ -28,4 +28,4 @@ const AnalyzedPhotoSchema = new mongoose.Schema({
 
 module.exports = {
     AnalyzedPhotoSchema: AnalyzedPhotoSchema
-}
+};
