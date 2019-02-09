@@ -16,7 +16,7 @@ export const store = new Vuex.Store({
 
     },
     mutations: {
-        
+
     },
     actions: {
         async getPhotos(context, credentials) {
@@ -34,12 +34,12 @@ export const store = new Vuex.Store({
                 throw new Error(response.data.error);
             return response.data.info;
         },
-        async getPhotoesByFiltres(context, credentials) {
-            const url = '/api/v1/filtre?filtres=' + credentials.filtres
+        async getPhotosByFilters(context, credentials) {
+            const url = '/api/v1/filter?filters=' + credentials.filters
                 + '&page=' + credentials.page
-                + '&per_page=' + NUMBER_OF_PHOTOS_PER_PAGE
-          const response = await axios.get(url);
-          console.log('response', response)
+                + '&per_page=' + NUMBER_OF_PHOTOS_PER_PAGE;
+            const response = await axios.get(url);
+            console.log('response', response);
             if (response.data.error)
                 throw new Error(response.data.error);
             return response.data.photos;
