@@ -340,6 +340,22 @@ export default {
       height = this.scale(height, 0, oldHeigth, 0, newHeight);
       top = this.scale(top, 0, oldHeigth, 0, newHeight);
 
+      if (left < 0) {
+        width = width + left;
+        left = 2;
+      } else if (left + width > newWidth) {
+        width = width - left - width + newWidth;
+        left = newWidth - 2 - width;
+      }
+
+      if (top < 0) {
+        height = height + top;
+        top = 2;
+      } else if (top + height > newHeight) {
+        height = height - top - height + newHeight;
+        top = newHeight - 2 - height;
+      }
+
       console.log(`HEIGHT OLD ${oldHeigth} NEW ${newHeight}`);
       console.log(`WIDTH OLD ${oldWidth} NEW ${newWidth}`);
       const position_str = `width: ${width}px; height:${height}px; left: ${left}px; top: ${top}px;`;
@@ -478,7 +494,7 @@ export default {
 }
 
 #sidebarCollapse {
-  padding: 0;
+  padding: 5px;
   color: #505050;
   border: none;
 }
