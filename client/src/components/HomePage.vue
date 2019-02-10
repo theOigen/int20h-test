@@ -277,7 +277,7 @@ export default {
           filters: this.emotes.join(" "), // filtres is a string in format "emote1 emote2 ... emoteN"
           page: page
         });
-        console.log("response", response);
+        // console.log("response", response);
         this.currPage = response.page;
         this.photos = response.photo;
         if (this.photos.length === 0) {
@@ -288,7 +288,7 @@ export default {
         this.prevPage = this.currPage - 1 > 0 ? this.currPage - 1 : 0;
         this.totalPages = 0;
         this.hasNextPage = response.nextPhotoIsExist;
-        console.log("response.nextPhotoIsExist", response.nextPhotoIsExist);
+        // console.log("response.nextPhotoIsExist", response.nextPhotoIsExist);
         for (const photo of this.photos)
           photo.meta = await this.getMeta(photo.url);
       } catch (error) {
@@ -300,7 +300,7 @@ export default {
     },
     async clickedOnPhoto(photo) {
       if (this.isLoadingInfo || photo.id === this.selectedPhoto.id) return; // implement reject;
-      console.log(photo.id);
+      // console.log(photo.id);
       this.selectedPhoto = photo;
       const isCashed = this.selectedPhoto.faces_info;
       if (!isCashed)
@@ -310,7 +310,7 @@ export default {
             "getPhotoInfo",
             photo.url
           );
-          console.log(response);
+          // console.log(response);
           this.selectedPhoto.faces_info = response.faces;
           this.addFaceInfoToCash(this.selectedPhoto.id, response.faces);
         } catch (error) {
@@ -318,7 +318,7 @@ export default {
         }
       else console.log("Already cashed");
       this.isLoadingInfo = false;
-      console.log(this.selectedPhoto.faces_info);
+      // console.log(this.selectedPhoto.faces_info);
     },
     addFaceInfoToCash(photoId, faces_info) {
       const cashedPhoto = this.photos.find(photo => photo.id === photoId);
@@ -356,8 +356,8 @@ export default {
         top = newHeight - 2 - height;
       }
 
-      console.log(`HEIGHT OLD ${oldHeigth} NEW ${newHeight}`);
-      console.log(`WIDTH OLD ${oldWidth} NEW ${newWidth}`);
+      // console.log(`HEIGHT OLD ${oldHeigth} NEW ${newHeight}`);
+      // console.log(`WIDTH OLD ${oldWidth} NEW ${newWidth}`);
       const position_str = `width: ${width}px; height:${height}px; left: ${left}px; top: ${top}px;`;
       return `position: absolute; outline: 2px solid ${this.calculateFaceColor(
         face.emotion
