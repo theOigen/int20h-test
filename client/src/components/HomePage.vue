@@ -1,127 +1,205 @@
 <template>
-  <div class="container">
-    <div class="row">
-      <!--  Filtration  -->
-      <div class="col-md-3 col-xs-3">
-        <div class="header affix">
-          <div class="table">
-            <div class="table-cell">
-              <div class="logo">
-                <router-link to="/">EMO!</router-link>
-                <div class="sub-logo">emotions only. nothing else.</div>
-              </div>
-              <div class="photo-filter">
-                <nav>
-                  <ul class="filter-list">
-                    <li>
-                      <a
-                        href="#"
-                        @click.prevent="filterEmote({ emote: 'happiness', page: 1})"
-                        :class="{ active: emotes.includes('happiness') }"
-                      >happiness</a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        @click.prevent="filterEmote({ emote: 'sadness', page: 1})"
-                        :class="{ active: emotes.includes('sadness') }"
-                      >sadness</a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        @click.prevent="filterEmote({ emote: 'anger', page: 1})"
-                        :class="{ active: emotes.includes('anger') }"
-                      >anger</a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        @click.prevent="filterEmote({ emote: 'disgust', page: 1})"
-                        :class="{ active: emotes.includes('disgust') }"
-                      >disgust</a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        @click.prevent="filterEmote({ emote: 'fear', page: 1})"
-                        :class="{ active: emotes.includes('fear') }"
-                      >fear</a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        @click.prevent="filterEmote({ emote: 'neutral', page: 1})"
-                        :class="{ active: emotes.includes('neutral') }"
-                      >neutral</a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        @click.prevent="filterEmote({ emote: 'surprise', page: 1})"
-                        :class="{ active: emotes.includes('surprise') }"
-                      >surprise</a>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
-              <div class="copyright">
-                <p>emo! &copy; 2019. Created by "Do Nothing Club"</p>
+  <div class="wrapper">
+    <div class="overlay" @click="closeBar()"></div>
+    <nav id="sidebar" ref="sidebar">
+      <div id="dismiss" @click="closeBar()">
+        <i class="fa fa-arrow-left"></i>
+      </div>
+      <div class="sidebar-header logo">
+        <router-link to="/">EMO!</router-link>
+        <div class="sub-logo">emotions only. nothing else.</div>
+      </div>
+      <ul class="filter-list list-unstyled components">
+        <li id="neutral">
+          <a
+            href="#"
+            @click.prevent="filterEmote({ emote: 'neutral', page: 1})"
+            :class="{ active: emotes.includes('neutral') }"
+          >neutral</a>
+        </li>
+        <li id="disgust">
+          <a
+            href="#"
+            @click.prevent="filterEmote({ emote: 'disgust', page: 1})"
+            :class="{ active: emotes.includes('disgust') }"
+          >disgust</a>
+        </li>
+        <li id="happiness">
+          <a
+            href="#"
+            @click.prevent="filterEmote({ emote: 'happiness', page: 1})"
+            :class="{ active: emotes.includes('happiness') }"
+          >happiness</a>
+        </li>
+        <li id="surprise">
+          <a
+            href="#"
+            @click.prevent="filterEmote({ emote: 'surprise', page: 1})"
+            :class="{ active: emotes.includes('surprise') }"
+          >surprise</a>
+        </li>
+        <li id="anger">
+          <a
+            href="#"
+            @click.prevent="filterEmote({ emote: 'anger', page: 1})"
+            :class="{ active: emotes.includes('anger') }"
+          >anger</a>
+        </li>
+        <li id="fear">
+          <a
+            href="#"
+            @click.prevent="filterEmote({ emote: 'fear', page: 1})"
+            :class="{ active: emotes.includes('fear') }"
+          >fear</a>
+        </li>
+        <li id="sadness">
+          <a
+            href="#"
+            @click.prevent="filterEmote({ emote: 'sadness', page: 1})"
+            :class="{ active: emotes.includes('sadness') }"
+          >sadness</a>
+        </li>
+      </ul>
+    </nav>
+    <div class="container" id="content">
+      <div class="row mobile-header logo">
+        <button
+          type="button"
+          id="sidebarCollapse"
+          class="btn btn-outline-dark"
+          @click.prevent="toggleSidebar()"
+        >
+          <i class="fa fa-align-left"></i>
+        </button>
+        <span id="mobile-logo">emo!</span>
+      </div>
+      <div class="row">
+        <!--  Filtration  -->
+        <div class="col-md-3">
+          <div class="header affix">
+            <div class="table">
+              <div class="table-cell">
+                <div class="logo">
+                  <router-link to="/">EMO!</router-link>
+                  <div class="sub-logo">emotions only. nothing else.</div>
+                </div>
+                <div class="photo-filter">
+                  <nav>
+                    <ul class="filter-list" id="main">
+                      <li id="neutral">
+                        <a
+                          href="#"
+                          @click.prevent="filterEmote({ emote: 'neutral', page: 1})"
+                          :class="{ active: emotes.includes('neutral') }"
+                        >neutral</a>
+                      </li>
+                      <li id="disgust">
+                        <a
+                          href="#"
+                          @click.prevent="filterEmote({ emote: 'disgust', page: 1})"
+                          :class="{ active: emotes.includes('disgust') }"
+                        >disgust</a>
+                      </li>
+                      <li id="happiness">
+                        <a
+                          href="#"
+                          @click.prevent="filterEmote({ emote: 'happiness', page: 1})"
+                          :class="{ active: emotes.includes('happiness') }"
+                        >happiness</a>
+                      </li>
+                      <li id="surprise">
+                        <a
+                          href="#"
+                          @click.prevent="filterEmote({ emote: 'surprise', page: 1})"
+                          :class="{ active: emotes.includes('surprise') }"
+                        >surprise</a>
+                      </li>
+                      <li id="anger">
+                        <a
+                          href="#"
+                          @click.prevent="filterEmote({ emote: 'anger', page: 1})"
+                          :class="{ active: emotes.includes('anger') }"
+                        >anger</a>
+                      </li>
+                      <li id="fear">
+                        <a
+                          href="#"
+                          @click.prevent="filterEmote({ emote: 'fear', page: 1})"
+                          :class="{ active: emotes.includes('fear') }"
+                        >fear</a>
+                      </li>
+                      <li id="sadness">
+                        <a
+                          href="#"
+                          @click.prevent="filterEmote({ emote: 'sadness', page: 1})"
+                          :class="{ active: emotes.includes('sadness') }"
+                        >sadness</a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+                <div class="copyright">
+                  <p>emo! &copy; 2019. Created by "Do Nothing Club"</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div v-if="!isLoading" class="col-md-9 col-xs-9">
-        <!-- Page Content -->
-        <div v-if="photos.length > 0" class="photos">
-          <div v-for="photo in photos" :key="photo.id" :ref="`photo${photo.id}`" class="photo-item">
-            <a href="#" @click.prevent="clickedOnPhoto(photo)">
-              <div v-if="photo.id === selectedPhoto.id && !isLoadingInfo ">
-                <div
-                  v-for="face in selectedPhoto.faces_info"
-                  :key="face.face_token"
-                  :style="calculateFaceClass(face, photo)"
-                  :title="face.emotion"
-                ></div>
-                <img :src="photo.url" alt>
-              </div>
-              <div v-else-if="photo.id === selectedPhoto.id && isLoadingInfo ">
-                <div class="blur-text">Loading...</div>
-                <img :src="photo.url" alt class="blur">
-              </div>
-              <div v-else class="image-container">
-                <div class="toblur">
+        <div v-if="!isLoading" class="col-md-9 col-md-offset-3">
+          <!-- Page Content -->
+          <div v-if="photos.length > 0" class="photos">
+            <div
+              v-for="photo in photos"
+              :key="photo.id"
+              :ref="`photo${photo.id}`"
+              class="photo-item"
+            >
+              <a href="#" @click.prevent="clickedOnPhoto(photo)">
+                <div v-if="photo.id === selectedPhoto.id && !isLoadingInfo ">
+                  <div
+                    v-for="face in selectedPhoto.faces_info"
+                    :key="face.face_token"
+                    :style="calculateFaceClass(face, photo)"
+                    :title="face.emotion"
+                  ></div>
                   <img :src="photo.url" alt>
                 </div>
-                <div class="overlay-text">Click to see emotions</div>
-              </div>
-            </a>
+                <div v-else-if="photo.id === selectedPhoto.id && isLoadingInfo ">
+                  <img :src="photo.url" alt class="blur">
+                </div>
+                <div v-else class="image-container">
+                  <div class="toblur">
+                    <img :src="photo.url" alt>
+                  </div>
+                  <div class="overlay-text">Click to see emotions</div>
+                </div>
+              </a>
+            </div>
+            <!-- Pagination -->
+            <pagination
+              v-if="photos.length || hasNextPage"
+              class="center"
+              :current="currPage"
+              :total="totalPages"
+              :page-range="pageRange"
+              :filtration="emotes.length !== 0"
+              :hasNextPage="hasNextPage"
+              :emotes="emotes"
+              @page-changed="getPhotos"
+              @page-changed-filtration="filterEmote"
+            ></pagination>
           </div>
-          <!-- Pagination -->
-          <pagination
-            v-if="photos.length || hasNextPage"
-            class="center"
-            :current="currPage"
-            :total="totalPages"
-            :page-range="pageRange"
-            :filtration="emotes.length !== 0"
-            :hasNextPage="hasNextPage"
-            :emotes="emotes"
-            @page-changed="getPhotos"
-            @page-changed-filtration="filterEmote"
-          ></pagination>
+          <div v-else>Opsie, no photos</div>
         </div>
-        <div v-else>Opsie, no photos</div>
-      </div>
-      <div v-else class="lds-place">
-        <div class="lds-ring">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
+        <div v-else class="lds-place">
+          <div class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -154,13 +232,17 @@ export default {
   mounted() {
     this.getPhotos(1);
   },
-  computed: {
-    filteredPhotos() {
-      // @todo filter photos by emote
-      // @todo in future send a request with current emoteString
-    }
-  },
   methods: {
+    toggleSidebar() {
+      $("#sidebar").addClass("active");
+      $(".overlay").addClass("active");
+    },
+    closeBar() {
+      // hide sidebar
+      $("#sidebar").removeClass("active");
+      // hide overlay
+      $(".overlay").removeClass("active");
+    },
     async getPhotos(page) {
       try {
         this.isLoading = true;
@@ -228,6 +310,7 @@ export default {
             "getPhotoInfo",
             photo.url
           );
+          console.log(response);
           this.selectedPhoto.faces_info = response.faces;
           this.addFaceInfoToCash(this.selectedPhoto.id, response.faces);
         } catch (error) {
@@ -267,28 +350,28 @@ export default {
     calculateFaceColor(emotion) {
       switch (emotion) {
         case "anger":
-          return "red";
+          return "rgb(212, 0, 0)";
           break;
         case "neutral":
-          return "white";
+          return "rgb(172, 172, 172)";
           break;
         case "disgust":
-          return "green";
+          return "rgb(3, 190, 3)";
           break;
         case "fear":
-          return "violet";
+          return "rgb(173, 39, 173)";
           break;
         case "happiness":
-          return "yellow";
+          return "rgb(224, 209, 0)";
           break;
         case "sadness":
-          return "skyblue";
+          return "rgb(84, 189, 230)";
           break;
         case "surprise":
-          return "magenta";
+          return "rgb(240, 156, 0)";
           break;
         default:
-          return "gray";
+          return "rgb(172, 172, 172)";
       }
     },
     async getMeta(url) {
@@ -310,6 +393,232 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.filter-list #sadness a {
+  color: rgb(84, 189, 230);
+}
+
+.filter-list #fear a {
+  color: rgb(173, 39, 173);
+}
+
+.filter-list #anger a {
+  color: rgb(212, 0, 0);
+}
+
+.filter-list #surprise a {
+  color: rgb(240, 156, 0);
+}
+
+.filter-list #neutral a {
+  color: rgb(172, 172, 172);
+}
+
+.filter-list #happiness a {
+  color: rgb(224, 209, 0);
+}
+
+.filter-list #disgust a {
+  color: rgb(3, 190, 3);
+}
+
+#sadness a.active,
+#sadness a:hover {
+  color: white;
+  background: rgb(84, 189, 230);
+}
+
+#fear a.active,
+#fear a:hover {
+  color: white;
+  background: rgb(151, 34, 151);
+}
+
+#anger a.active,
+#anger a:hover {
+  color: white;
+  background: rgb(212, 0, 0);
+}
+
+#surprise a.active,
+#surprise a:hover {
+  color: white;
+  background: rgb(240, 156, 0);
+}
+
+#neutral a.active,
+#neutral a:hover {
+  color: white;
+  background: rgb(172, 172, 172);
+}
+
+#happiness a.active,
+#happiness a:hover {
+  color: white;
+  background: rgb(224, 209, 0);
+}
+
+#disgust a.active,
+#disgust a:hover {
+  color: white;
+  background: rgb(3, 190, 3);
+}
+
+.mobile-header {
+  padding-bottom: 0;
+  padding-top: 10px;
+  text-align: center;
+}
+
+#mobile-logo {
+  margin: auto;
+}
+
+#sidebarCollapse {
+  padding: 0;
+  color: #505050;
+  border: none;
+}
+
+#sidebarCollapse:hover {
+  color: #000000;
+  background: none;
+  border: none;
+}
+
+#sidebarCollapse:focus {
+  box-shadow: none;
+}
+
+#sidebar .sidebar-header {
+  padding: 20px;
+  color: rgb(219, 219, 219);
+  background: #242424c7;
+}
+
+#sidebar .sidebar-header .sub-logo {
+  color: rgb(179, 178, 178);
+}
+
+#sidebar ul.components {
+  padding: 20px 0;
+  border-bottom: 1px solid #3b3b3b;
+}
+
+#sidebar ul p {
+  color: #fff;
+  padding: 10px;
+}
+
+#sidebar ul li a {
+  font-family: "Roboto", serif;
+  padding: 10px;
+  padding-right: 20px;
+  font-size: 1.1em;
+  letter-spacing: 1px;
+  display: block;
+}
+
+@media screen and (min-width: 768px) {
+  #sidebarCollapse {
+    display: none;
+  }
+  #mobile-logo {
+    display: none;
+  }
+  .lds-place {
+    position: absolute;
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 100px;
+    width: 100px;
+    height: 100px;
+  }
+}
+
+@media (max-width: 767px) {
+  #sidebar {
+    margin-left: -250px;
+  }
+  #sidebar.active {
+    margin-left: 0;
+  }
+  .header {
+    display: none;
+  }
+  .lds-place {
+    position: absolute;
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100px;
+    height: 100px;
+  }
+}
+
+.wrapper {
+  display: block;
+}
+
+#sidebar {
+  min-width: 250px;
+  max-width: 250px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  margin-left: -250px;
+  background: #242424c7;
+  color: #fff;
+  text-align: right;
+  transition: all 0.3s;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  /* full screen */
+  height: 100vh;
+  width: 100vw;
+  /* transparent black */
+  background: rgba(0, 0, 0, 0.7);
+  /* middle layer, i.e. appears below the sidebar */
+  z-index: 999;
+  opacity: 0;
+  /* animate the transition */
+  transition: all 0.5s ease-in-out;
+}
+
+.overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+#dismiss {
+  width: 35px;
+  height: 35px;
+  position: absolute;
+  /* top left corner of the sidebar */
+  top: 10px;
+}
+
+#sidebar ul.components {
+  padding: 20px 0;
+  border-bottom: 1px solid #ffffff;
+}
+
+#sidebar.active {
+  margin-left: 0px;
+}
+
+a[data-toggle="collapse"] {
+  position: relative;
+}
+
 .header {
   width: 220px;
   bottom: 0;
@@ -423,7 +732,7 @@ export default {
   color: #474747;
   text-transform: none;
   line-height: 17px;
-  letter-spacing: 2;
+  letter-spacing: 2px;
 }
 
 .photo-filter {
@@ -431,6 +740,11 @@ export default {
   letter-spacing: 1px;
   font-size: 18px;
   line-height: 24px;
+}
+
+.navbar .filter-list {
+  text-align: right;
+  margin: 0 0 0 95px;
 }
 
 .photo-filter ul,
@@ -472,19 +786,12 @@ a {
 
 img {
   max-width: 100%;
-  /*height: auto;*/
   vertical-align: middle;
   border: 0;
 }
 
 .filter-list a.active {
   color: #000;
-}
-
-.lds-place {
-  position: relative;
-  top: 270px;
-  left: 350px;
 }
 
 .lds-ring {

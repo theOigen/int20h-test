@@ -18,9 +18,6 @@
         <a v-else href="#" @click.prevent="changePage(page)">{{ page }}</a>
       </span>
       <a v-if="hasLastDots()">...</a>
-      <!-- <span v-if="hasLast()">
-        <a href="#" @click.prevent="changePage(total)">{{ total }}</a>
-      </span>-->
       <a href="#" v-if="hasNext()" @click.prevent="changePage(nextPage)">
         <i class="fa fa-long-arrow-right"></i>
       </a>
@@ -59,8 +56,8 @@ export default {
   computed: {
     pages() {
       let pages = [];
-      console.log("computed/pages/this.rangeStart", this.rangeStart);
-      console.log("computed/pages/this.rangeEnd", this.rangeEnd);
+      // console.log("computed/pages/this.rangeStart", this.rangeStart);
+      // console.log("computed/pages/this.rangeEnd", this.rangeEnd);
       for (let i = this.rangeStart; i <= this.rangeEnd; i++) {
         pages.push(i);
       }
@@ -111,11 +108,6 @@ export default {
       return this.filtration
         ? this.hasNextPage
         : this.rangeEnd < this.total - 1;
-      /*if (this.rangeEnd >= this.total - 1) {
-        return false;
-      } else {
-        return true;
-      }*/
     },
     hasPrev() {
       return this.current > 1;
@@ -132,11 +124,6 @@ export default {
         });
       else this.$emit("page-changed", page);
     }
-    /*
-      Комментарий от Симбы:
-
-              "hasLastDots и hasNext. Проверьте предназначение! Зачем вычислять по-разному проверки для следующей точки и для стрелки Вперед?"
-    */
   }
 };
 </script>

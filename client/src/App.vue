@@ -14,7 +14,6 @@ export default {
 <style>
 body {
   margin: 0;
-  padding: 50px 0 0;
   font-family: "Lato", serif;
   font-size: 14px;
   background: #ffffff;

@@ -64,7 +64,6 @@ class Api {
                 } else face.emotion = "none";
                 face.attributes = undefined; // delete unused fields
             }
-            //console.log(response.data);
         } catch (error) {
             console.error(error.response.data);
             result.error = new Error(error.response.data.error_message);
@@ -169,10 +168,10 @@ class Api {
             for (const face of photo.faces_info) {
                 const index = filters_copy.indexOf(face.emotion);
                 if (index !== -1) {
-                    console.log('there is an emotion!');
-                    console.log(`before` + filters_copy);
+                    // console.log('there is an emotion!');
+                    // console.log(`before` + filters_copy);
                     filters_copy.splice(index, 1);
-                    console.log('after' + filters_copy);
+                    // console.log('after' + filters_copy);
                 }
                 if (filters_copy.length === 0) break;
             }
@@ -201,7 +200,7 @@ class Api {
         while (!photoset || photoset.photos.photo.length !== 0) {
             photoset = await this.getPhotos(page, 500);
             if (photoset.error) {
-                console.log("Error detected in function getAllPhotos()");
+                // console.log("Error detected in function getAllPhotos()");
                 allPhotos.photos = null;
                 allPhotos.error = photoset.error;
                 return allPhotos;
@@ -209,7 +208,7 @@ class Api {
             allPhotos.photos = allPhotos.photos.concat(photoset.photos.photo);
             page++;
         }
-        console.log(`Found ${allPhotos.photos.length} photos`);
+        // console.log(`Found ${allPhotos.photos.length} photos`);
         return allPhotos;
     }
     static async equalizeDbAndFlickr() {
@@ -225,7 +224,7 @@ class Api {
         }
         for (const photo of dbPhotos) {
             if (!flickrPhotos.photos.find(x => x.id === photo.id)) {
-                console.log('Found removed from Flickr photo, but existing in the database');
+                // console.log('Found removed from Flickr photo, but existing in the database');
                 await DB_analyzedPhotos.delete(photo.id);
             }
         }

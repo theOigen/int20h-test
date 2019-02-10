@@ -12,7 +12,6 @@ router.get('/photos', async (req, res) => {
     const response = !is_raw ?
         await api.getAnalyzedPhotos(page, per_page) :
         await api.getPhotos(page, per_page);
-    // console.log(response.photos.photo);
     res.json(response);
 });
 
@@ -40,11 +39,6 @@ router.get('/filter', async (req, res) => {
     const response = await api.getPhotosByFilters(filters, page, per_page);
     res.json(response);
 });
-
-// define the about route
-// router.get('/about', function(req, res) {
-//   res.send('About birds');
-// });
 
 module.exports = router;
 
