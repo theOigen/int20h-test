@@ -7,7 +7,7 @@ Face analyzing platform implemented by do nothing club for int20h test assignmen
 How to run it locally (linux/macos):
 1. Clone repo / download zip
 2. Go to server folder -> run "npm install" (to install dependencies) -> run "npm start"
-3. Go to client folder -> run "npm install" (to install dependencies) -> run "npm start"
+3. Go to client folder -> comment line 10 in file /store/store.js, than uncomment line 9 -> run "npm install" (to install dependencies) -> run "npm start"
 Thats all! Now check your localhost:8080
 
 How to build it (linux/macos):
