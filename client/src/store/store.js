@@ -6,7 +6,8 @@ Vue.use(Vuex);
 
 const NUMBER_OF_PHOTOS_PER_PAGE = 2;
 
-axios.defaults.baseURL = 'http://localhost:3000';
+// axios.defaults.baseURL = 'http://localhost:3000';
+axios.defaults.baseURL = 'https://emo20h.herokuapp.com';
 
 export const store = new Vuex.Store({
     state: {

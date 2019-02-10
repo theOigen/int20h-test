@@ -189,7 +189,7 @@
               @page-changed-filtration="filterEmote"
             ></pagination>
           </div>
-          <div v-else>Opsie, no photos</div>
+          <div v-else class="not_found text-center display-4">Opsie, no photos</div>
         </div>
         <div v-else class="lds-place">
           <div class="lds-ring">
@@ -393,6 +393,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.not_found {
+  padding: 20% 0;
+}
+
 .filter-list #sadness a {
   color: rgb(84, 189, 230);
 }
