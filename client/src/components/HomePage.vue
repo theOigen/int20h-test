@@ -222,7 +222,7 @@ export default {
       prevPage: -1,
       hasNextPage: false,
       totalPages: 0,
-      pageRange: 1,
+      pageRange: 5,
       searchResult: "",
       isLoading: false,
       isLoadingInfo: false,

@@ -4,7 +4,7 @@ import axios from 'axios';
 
 Vue.use(Vuex);
 
-const NUMBER_OF_PHOTOS_PER_PAGE = 2;
+const NUMBER_OF_PHOTOS_PER_PAGE = 5;
 
 // axios.defaults.baseURL = 'http://localhost:3000';
 axios.defaults.baseURL = 'https://emo20h.herokuapp.com';
