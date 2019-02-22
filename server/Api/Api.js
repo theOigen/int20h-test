@@ -208,7 +208,7 @@ class Api {
             allPhotos.photos = allPhotos.photos.concat(photoset.photos.photo);
             page++;
         }
-        // console.log(`Found ${allPhotos.photos.length} photos`);
+        console.log(`Found ${allPhotos.photos.length} photos`);
         return allPhotos;
     }
     static async equalizeDbAndFlickr() {
@@ -224,7 +224,7 @@ class Api {
         }
         for (const photo of dbPhotos) {
             if (!flickrPhotos.photos.find(x => x.id === photo.id)) {
-                // console.log('Found removed from Flickr photo, but existing in the database');
+                console.log('Found removed from Flickr photo, but existing in the database');
                 await DB_analyzedPhotos.delete(photo.id);
             }
         }
